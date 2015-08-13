@@ -11,3 +11,35 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+[[ -s "$HOME/dotfiles/aliases" ]] && source "$HOME/dotfiles/aliases"
+
+
+function setjdk() {
+  if [ $# -ne 0 ]; then
+   removeFromPath '/System/Library/Frameworks/JavaVM.framework/Home/bin'
+   if [ -n "${JAVA_HOME+x}" ]; then
+    removeFromPath $JAVA_HOME
+   fi
+   export JAVA_HOME=`/usr/libexec/java_home -v $@`
+   export PATH=$JAVA_HOME/bin:$PATH
+  fi
+ }
+ function removeFromPath() {
+  export PATH=$(echo $PATH | sed -E -e "s;:$1;;" -e "s;$1:?;;")
+ }
+setjdk 1.7
+
+# $1 = type; 0 - both, 1 - tab, 2 - title
+# rest = text
+setTerminalText () {
+    # echo works in bash & zsh
+    local mode=$1 ; shift
+    echo -ne "\033]$mode;$@\007"
+}
+set-both  () { setTerminalText 0 $@; }
+set-tab   () { setTerminalText 1 $@; }
+set-title () { setTerminalText 2 $@; }
+
+unsetopt inc_append_history
+unsetopt share_history
+
